@@ -1,9 +1,10 @@
 import numpy as np
 import numexpr as ne
+import pywarraychannels.filters
 
 ### Channel class
-class Channel():
-    def __init__(self, antenna_RX, antenna_TX, K = 128, f_c = 60e9, B = 1.760e9, N = 1e-20, filter = RCFilter()):
+class AWGN():
+    def __init__(self, antenna_RX, antenna_TX, K = 128, f_c = 60e9, B = 1.760e9, N = 1e-20, filter = pywarraychannels.filters.RCFilter()):
         self.antenna_RX = antenna_RX
         self.antenna_TX = antenna_TX
         self.f_c = f_c
