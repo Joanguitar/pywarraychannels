@@ -8,6 +8,8 @@ class Static():
         pass
     def apply(self, dir):
         return dir
+    def apply_inverse(self, dir):
+        return dir
     def print(self):
         print("Static")
 
@@ -43,6 +45,11 @@ class UniformTiltPanRoll():
             roll_sin = np.sin(roll)
             self.transform = np.dot(self.transform, np.array([[1, 0, 0], [0, roll_cos, -roll_sin], [0, roll_sin, roll_cos]]))
     def apply(self, dir):
+        if not (self.u_tilt or self.u_pan or self.u_roll):
+            return dir
+        else:
+            return np.dot(dir, self.transform.T)
+    def apply_inverse(self, dir):
         if not (self.u_tilt or self.u_pan or self.u_roll):
             return dir
         else:

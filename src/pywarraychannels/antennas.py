@@ -7,18 +7,20 @@ class Antenna():
     def __init__(self, antenna_elements, uncertainty = pywarraychannels.uncertainties.Static()):
         """Example: Antenna([[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0]])"""
         self.antenna_elements = np.array(antenna_elements)
-        self.codebook = sfft.fft(np.eye(len(antenna_elements)))/np.sqrt(len(antenna_elements))
         self.uncertainty = uncertainty
+        self.set_codebook(sfft.fft(np.eye(len(antenna_elements)))/np.sqrt(len(antenna_elements)))
     def scalar_dir(self, dir):
         dir = np.array(dir)
         dir = dir/np.linalg.norm(dir, axis = 0)
-        dir = self.uncertainty.apply(dir)
+        dir = self.uncertainty.apply_inverse(dir)
         return np.dot(dir, self.antenna_elements.T)
     def response(self, dir):
         sdir = self.scalar_dir(dir)
         return ne.evaluate("cos(sdir)+1i*sin(sdir)")
     def update_uncertainty(self):
         self.uncertainty.update()
+    def set_codebook(self, codebook):
+        self.codebook = codebook
 
 ### Basic antenna classes
 class LinearAntenna(Antenna):
