@@ -35,14 +35,15 @@ class Geometric():
         return "Geometric channel\nSize: "+"x".join([str(a) for a in np.shape(self.channel)])+"\nEntries: "+" ".join([str(a) for a in np.ndarray.flatten(self.channel)])
 
 class AWGN():
-    def __init__(self, channel_dependency, N = 1e-20):
+    def __init__(self, channel_dependency, power = 1, noise = 1e-1):
         self.channel_dependency = channel_dependency
-        self.sigma = np.sqrt(N)
+        self.amp = sqrt(power)
+        self.sigma = np.sqrt(noise)
     def build(self, *args):
         return self.channel_dependency.build(*args)
     def measure(self):
         rx_c_tx = self.channel_dependency.measure()
         noise = (self.sigma/np.sqrt(2))*(np.random.randn(*rx_c_tx.shape)+1j*np.random.randn(*rx_c_tx.shape))
-        return rx_c_tx + noise
+        return self.amp*rx_c_tx + noise
     def __str__(self):
         self.channel_dependency.print()
