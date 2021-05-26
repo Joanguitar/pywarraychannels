@@ -37,7 +37,7 @@ class Geometric():
 class AWGN():
     def __init__(self, channel_dependency, power = 1, noise = 1e-1):
         self.channel_dependency = channel_dependency
-        self.amp = sqrt(power)
+        self.amp = np.sqrt(power)
         self.sigma = np.sqrt(noise)
     def build(self, *args):
         return self.channel_dependency.build(*args)
