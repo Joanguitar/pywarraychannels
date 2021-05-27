@@ -27,10 +27,17 @@ class Geometric():
                 {"cg": complex_gain, "pi": np.pi, "sdoa": scalar_doa[:, np.newaxis, np.newaxis], "sdod": scalar_dod[np.newaxis, :, np.newaxis], "fk": self.f_k_rel[np.newaxis, np.newaxis, :], "tr": response_time[np.newaxis, np.newaxis, :]}) # Equivalente optimized line
         self.channel = channel
         return channel
-    def measure(self):
-        c_tx = np.tensordot(self.antenna_TX.codebook, self.channel, axes = (1, 1))
-        rx_c_tx = np.tensordot(np.conj(self.antenna_RX.codebook), c_tx, axes = (1, 1))
-        return rx_c_tx
+    def measure(self, mode = "Pairs"):
+        if mode == "Pairs":
+            c_tx = np.tensordot(self.antenna_TX.codebook, self.channel, axes = (0, 1))
+            rx_c_tx = np.tensordot(np.conj(self.antenna_RX.codebook), c_tx, axes = (0, 1))
+            return rx_c_tx
+        elif mode == "Sequential":
+            rxtx_c = np.tensordot(self.antenna_TX.codebook[np.newaxis, :, :]*np.conj(self.antenna_RX.codebook)[:, np.newaxis, :], self.channel, axes = ([0, 1], [0, 1]))
+            return rxtx_c
+        else:
+            print("Measure mode {} not recognized".format(mode))
+            raise
     def __str__(self):
         return "Geometric channel\nSize: "+"x".join([str(a) for a in np.shape(self.channel)])+"\nEntries: "+" ".join([str(a) for a in np.ndarray.flatten(self.channel)])
 
@@ -38,12 +45,12 @@ class AWGN():
     def __init__(self, channel_dependency, power = 1, noise = 1e-1):
         self.channel_dependency = channel_dependency
         self.amp = np.sqrt(power)
-        self.sigma = np.sqrt(noise)
-    def build(self, *args):
-        return self.channel_dependency.build(*args)
-    def measure(self):
-        rx_c_tx = self.channel_dependency.measure()
-        noise = (self.sigma/np.sqrt(2))*(np.random.randn(*rx_c_tx.shape)+1j*np.random.randn(*rx_c_tx.shape))
-        return self.amp*rx_c_tx + noise
+        self.sigma = np.sqrt(noise/2)
+    def build(self, *args, **kwargs):
+        return self.channel_dependency.build(*args, **kwargs)
+    def measure(self, *args, **kwargs):
+        meas = self.channel_dependency.measure(*args, **kwargs)
+        noise = self.sigma*(np.random.randn(*meas.shape)+1j*np.random.randn(*meas.shape))
+        return self.amp*meas + noise
     def __str__(self):
         self.channel_dependency.print()
