@@ -8,6 +8,13 @@ class RCFilter():
         self.early_samples = early_samples
     def response(self, T, delay):
         tt = np.arange(T)
-        return np.sinc((tt + self.early_samples - delay) / self.M_rc) * \
-            np.cos(np.pi * self.rolloff_rc * (tt + self.early_samples - delay) / self.M_rc) / \
-            (1 - np.power((2 * self.rolloff_rc * (tt + self.early_samples - delay) / self.M_rc), 2))
+        if np.isscalar(delay) or len(np.array(delay).shape) == 0:
+            return np.sinc((tt + self.early_samples - delay) / self.M_rc) * \
+                np.cos(np.pi * self.rolloff_rc * (tt + self.early_samples - delay) / self.M_rc) / \
+                (1 - np.power((2 * self.rolloff_rc * (tt + self.early_samples - delay) / self.M_rc), 2))
+        else:
+            tt = tt[:, np.newaxis]
+            delay = np.array(delay)[np.newaxis, :]
+            return np.sinc((tt + self.early_samples - delay) / self.M_rc) * \
+                np.cos(np.pi * self.rolloff_rc * (tt + self.early_samples - delay) / self.M_rc) / \
+                (1 - np.power((2 * self.rolloff_rc * (tt + self.early_samples - delay) / self.M_rc), 2))

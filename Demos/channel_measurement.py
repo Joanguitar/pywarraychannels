@@ -15,7 +15,7 @@ channel = pywarraychannels.channels.AWGN(pywarraychannels.channels.Geometric(ant
 
 ### Read TestRays
 with open("Demos/TestRays.txt") as f:
-    rays = pywarraychannels.em.Geometric([[float(p) for p in ray.split()] for ray in f.read().split("\n")[:1]])
+    rays = pywarraychannels.em.Geometric([[float(p) for p in ray.split()] for ray in f.read().split("\n")[:-1]])
 
 ### Build the channel
 channel.build(rays)
