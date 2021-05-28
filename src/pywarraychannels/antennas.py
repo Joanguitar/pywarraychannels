@@ -26,6 +26,7 @@ class Antenna():
     def update_uncertainty(self):
         self.uncertainty.update()
     def set_codebook(self, codebook):
+        codebook = codebook/np.linalg.norm(codebook, ord = 2, axis = 0)[np.newaxis, ...]
         self.codebook = codebook
 
 ### Basic antenna classes
@@ -55,7 +56,17 @@ class RectangularAntenna(Antenna):
         grid = np.array([grid_x, grid_y]).T
         super(RectangularAntenna, self, *args).__init__(np.dot(grid, dir), *args, **kwargs)
         self.N_antennas = N_antennas
-        self.codebook = np.kron(sfft.fft(np.eye(N_antennas[0])), sfft.fft(np.eye(N_antennas[1])))/np.sqrt(N_antennas[0]*N_antennas[1])
+        self.set_pair_codebook(sfft.fft(np.eye(N_antennas[0])), sfft.fft(np.eye(N_antennas[1])))
+    def set_pair_codebook(self, cdb1, cdb2):
+        cdb1 = cdb1/np.linalg.norm(cdb1, ord = 2, axis = 0)[np.newaxis, ...]
+        cdb2 = cdb2/np.linalg.norm(cdb2, ord = 2, axis = 0)[np.newaxis, ...]
+        self.cdb1 = cdb1
+        self.cdb2 = cdb2
+        super(RectangularAntenna, self).set_codebook(np.kron(cdb1, cdb2))
+    def set_codebook(self, codebook):
+        self.cdb1 = None
+        self.cdb2 = None
+        super(RectangularAntenna, self).set_codebook(codebook)
     def set_reduced_codebook(self, n, overlap = True):
         if overlap:
             width1, width2 = 2*np.pi/n[0]+np.pi/self.N_antennas[0], 2*np.pi/n[1]+np.pi/self.N_antennas[1]
@@ -69,4 +80,4 @@ class RectangularAntenna(Antenna):
         angles2 = np.linspace(0, 2*np.pi, n[1], endpoint = False)
         cdb1 = bp1[:, np.newaxis]*np.exp(1j*np.arange(self.N_antennas[0])[:, np.newaxis]*angles1[np.newaxis, :])
         cdb2 = bp2[:, np.newaxis]*np.exp(1j*np.arange(self.N_antennas[1])[:, np.newaxis]*angles2[np.newaxis, :])
-        self.set_codebook(np.kron(cdb1, cdb2))
+        self.set_pair_codebook(cdb1, cdb2)
