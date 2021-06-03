@@ -20,7 +20,7 @@ class Geometric():
             dod = np.array([np.cos(dod_el)*np.cos(dod_az), np.cos(dod_el)*np.sin(dod_az), np.sin(dod_el)])                                              # Create direction vectors
             scalar_doa = self.antenna_RX.scalar_dir(doa)
             scalar_dod = self.antenna_TX.scalar_dir(dod)
-            response_time = self.filter.response(len(self.f_k_rel), tau*self.B)
+            response_time = np.sqrt(len(self.f_k_rel))*self.filter.response(len(self.f_k_rel), tau*self.B)
             complex_gain = np.power(10, (power-30)/20)*np.exp(1j*phase)
             #channel += complex_gain*np.exp(1j*np.pi*(scalar_doa[:, np.newaxis, np.newaxis]-scalar_dod[np.newaxis, :, np.newaxis])*f_k_rel[np.newaxis, np.newaxis, :])*response_time[np.newaxis, np.newaxis, :]
             channel += ne.evaluate("cg*(cos(pi*(sdoa-sdod)*fk)+1j*sin(pi*(sdoa-sdod)*fk))*tr", global_dict = \
