@@ -12,9 +12,10 @@ class Geometric():
         self.f_k = np.linspace(f_c-B/2, f_c+B/2, K, endpoint = False)+B/(2*K)
         self.f_k_rel = self.f_k/f_c
         self.filter = filter
+        self.bool_sync
     def build(self, rays):
         channel = np.zeros([len(self.antenna_RX.antenna_elements), len(self.antenna_TX.antenna_elements), len(self.f_k_rel)], dtype = "complex128")
-        if bool_sync:
+        if self.bool_sync:
             tau_min = np.min([ray[1] for ray in rays])
         else:
             tau_min = 0
