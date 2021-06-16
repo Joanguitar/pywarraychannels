@@ -15,6 +15,10 @@ class RCFilter():
         else:
             tt = tt[:, np.newaxis]
             delay = np.array(delay)[np.newaxis, :]
-            return np.sinc((tt + self.early_samples - delay) / self.M_rc) * \
-                np.cos(np.pi * self.rolloff_rc * (tt + self.early_samples - delay) / self.M_rc) / \
-                (1 - np.power((2 * self.rolloff_rc * (tt + self.early_samples - delay) / self.M_rc), 2))
+            denominator = 1 - np.power((2 * self.rolloff_rc * (tt + self.early_samples - delay) / self.M_rc), 2)
+            if np.abs(denominator) < 1e-6:
+                return np.sinc(1/(2*self.rolloff_rc))*(np.pi/4)
+            else:
+                return np.sinc((tt + self.early_samples - delay) / self.M_rc) * \
+                    np.cos(np.pi * self.rolloff_rc * (tt + self.early_samples - delay) / self.M_rc) / \
+                    denominator
