@@ -43,10 +43,10 @@ class Geometric():
         if mode == "Pairs":
             c_tx = np.tensordot(self.antenna_TX.codebook, self.channel, axes = (0, 1))
             rx_c_tx = np.tensordot(np.conj(self.antenna_RX.codebook), c_tx, axes = (0, 1))
-            return sndimage.convolve1d(rx_c_tx, signal, axis = 2)
+            return sndimage.convolve1d(np.pad(rx_c_tx, ((0, 0), (0, 0), (len(signal)-1, 0))), signal, axis = 2)
         elif mode == "Sequential":
             rxtx_c = np.tensordot(self.antenna_TX.codebook[np.newaxis, :, :]*np.conj(self.antenna_RX.codebook)[:, np.newaxis, :], self.channel, axes = ([0, 1], [0, 1]))
-            return sndimage.convolve1d(rxtx_c, signal, axis = 1)
+            return sndimage.convolve1d(np.pad(rxtx_c, ((0, 0), (len(signal)-1, 0))), signal, axis = 1)
         else:
             print("Measure mode {} not recognized".format(mode))
             raise

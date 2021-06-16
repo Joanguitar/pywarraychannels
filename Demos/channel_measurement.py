@@ -27,5 +27,13 @@ antenna_TX.set_codebook(antenna_TX.codebook[:, :32])
 measure_seq = channel.measure(mode = "Sequential")
 
 ### Plot measure
+plt.figure(1)
+plt.plot(np.linalg.norm(measure, ord = "fro", axis = (1, 2)))
+plt.title("RX measurement spectrum")
+plt.figure(2)
 plt.imshow(np.reshape(np.linalg.norm(measure, ord = "fro", axis = (0, 2)), (8, 16)))
+plt.title("TX measurement spectrum")
+plt.figure(3)
+plt.plot(np.linalg.norm(np.reshape(measure, [-1, measure.shape[2]]), ord = 2, axis = 0))
+plt.title("Time measurement spectrum")
 plt.show()
