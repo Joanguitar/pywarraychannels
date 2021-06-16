@@ -61,4 +61,4 @@ class AWGN():
         noise = self.sigma*(np.random.randn(*meas.shape)+1j*np.random.randn(*meas.shape))
         return self.amp*meas + noise
     def __str__(self):
-        self.channel_dependency.print()
+        return "AWGN + "+str(self.channel_dependency)
