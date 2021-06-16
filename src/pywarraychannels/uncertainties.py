@@ -10,8 +10,8 @@ class Static():
         return dir
     def apply_inverse(self, dir):
         return dir
-    def print(self):
-        print("Static")
+    def __str__(self):
+        return "Static"
 
 class UniformTiltPanRoll():
     def __init__(self, u_tilt = True, u_pan = True, u_roll = True):
