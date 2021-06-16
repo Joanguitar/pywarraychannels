@@ -8,10 +8,9 @@ uncertainty_RX = pywarraychannels.uncertainties.UniformTiltPanRoll(u_pan = False
 ### Define antennas
 antenna_RX = pywarraychannels.antennas.LinearAntenna(32, uncertainty = uncertainty_RX)
 antenna_TX = pywarraychannels.antennas.RectangularAntenna((8, 16))
-print(np.reshape(antenna_TX.antenna_elements, (8, 16, 3)))
 
 ### Define the channel class
-channel = pywarraychannels.channels.AWGN(pywarraychannels.channels.Geometric(antenna_RX, antenna_TX), noise = 0)
+channel = pywarraychannels.channels.AWGN(pywarraychannels.channels.Geometric(antenna_RX, antenna_TX, filter = pywarraychannels.filters.RCFilter(early_samples = 16, late_samples = 128)), noise = 0)
 
 ### Read TestRays
 with open("Demos/TestRays.txt") as f:

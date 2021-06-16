@@ -15,7 +15,7 @@ class Geometric():
         self.filter = filter
         self.bool_sync = bool_sync
     def build(self, rays):
-        channel = np.zeros([len(self.antenna_RX.antenna_elements), len(self.antenna_TX.antenna_elements), len(self.f_k_rel)], dtype = "complex128")
+        channel = None
         if self.bool_sync:
             tau_min = np.min([ray[1] for ray in rays])
         else:
@@ -26,11 +26,15 @@ class Geometric():
             dod = np.array([np.cos(dod_el)*np.cos(dod_az), np.cos(dod_el)*np.sin(dod_az), np.sin(dod_el)])                                              # Create direction vectors
             scalar_doa = self.antenna_RX.scalar_dir(doa)
             scalar_dod = self.antenna_TX.scalar_dir(dod)
-            response_time = self.filter.response(len(self.f_k_rel), (tau-tau_min)*self.B)
+            response_time = self.filter.response(len(self.f_k_rel), (tau-tau_min)*self.B+(scalar_doa[:, np.newaxis]-scalar_dod[np.newaxis, :])*self.B/self.f_c)
             complex_gain = np.power(10, (power-30)/20)*np.exp(1j*phase)
             #channel += complex_gain*np.exp(1j*np.pi*(scalar_doa[:, np.newaxis, np.newaxis]-scalar_dod[np.newaxis, :, np.newaxis])*f_k_rel[np.newaxis, np.newaxis, :])*response_time[np.newaxis, np.newaxis, :]
-            channel += ne.evaluate("cg*(cos(pi*(sdoa-sdod)*fk)+1j*sin(pi*(sdoa-sdod)*fk))*tr", global_dict = \
-                {"cg": complex_gain, "pi": np.pi, "sdoa": scalar_doa[:, np.newaxis, np.newaxis], "sdod": scalar_dod[np.newaxis, :, np.newaxis], "fk": self.f_k_rel[np.newaxis, np.newaxis, :], "tr": response_time[np.newaxis, np.newaxis, :]}) # Equivalente optimized line
+            if channel is None:
+                channel = ne.evaluate("cg*(cos(pi*(sdoa-sdod))+1j*sin(pi*(sdoa-sdod)))*tr", global_dict = \
+                    {"cg": complex_gain, "pi": np.pi, "sdoa": scalar_doa[:, np.newaxis, np.newaxis], "sdod": scalar_dod[np.newaxis, :, np.newaxis], "tr": np.transpose(response_time, [1, 2, 0])}) # Equivalente optimized line
+            else:
+                channel += ne.evaluate("cg*(cos(pi*(sdoa-sdod))+1j*sin(pi*(sdoa-sdod)))*tr", global_dict = \
+                    {"cg": complex_gain, "pi": np.pi, "sdoa": scalar_doa[:, np.newaxis, np.newaxis], "sdod": scalar_dod[np.newaxis, :, np.newaxis], "tr": np.transpose(response_time, [1, 2, 0])}) # Equivalente optimized line
         self.channel = channel
         return channel
     def measure(self, signal = None, mode = "Pairs"):
