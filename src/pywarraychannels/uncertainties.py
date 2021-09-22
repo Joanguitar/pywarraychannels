@@ -21,10 +21,10 @@ class Static():
         pass
 
     def apply(self, dir):
-        return dir
+        return np.dot(dir, self.transform.T)
 
     def apply_inverse(self, dir):
-        return dir
+        return np.dot(dir, self.transform)
 
     def __str__(self):
         return "Static: {:.1f} [deg]\nPan: {:.1f} [deg]\nRoll: {:.1f} [deg]".format(*self.state*180/np.pi)

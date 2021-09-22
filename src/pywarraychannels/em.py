@@ -13,12 +13,15 @@ class Geometric():
                 ray_info = ray_info[np.newaxis, :]
             else:
                 ray_info = ray_info[np.newaxis, :].T
-        if bool_flip_RXTX:
-            ray_info[:, 3], ray_info[:, 4], ray_info[:, 5], ray_info[:, 6] = ray_info[:, 5], ray_info[:, 6], ray_info[:, 3], ray_info[:, 4]
         self.ray_info = ray_info
+        if bool_flip_RXTX:
+            self.flip_RXTX()
     def flip_RXTX(self):
         ray_info = np.copy(self.ray_info)
-        self.ray_info[:, 3], self.ray_info[:, 4], self.ray_info[:, 5], self.ray_info[:, 6] = ray_info[:, 5], ray_info[:, 6], ray_info[:, 3], ray_info[:, 4]
+        self.ray_info[:, 3] = ray_info[:, 5]
+        self.ray_info[:, 4] = ray_info[:, 6]
+        self.ray_info[:, 5] = ray_info[:, 3]
+        self.ray_info[:, 6] = ray_info[:, 4]
     def __iter__(self):
         return iter(self.ray_info)
     def __str__(self):
