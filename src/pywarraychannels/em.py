@@ -18,8 +18,7 @@ class Geometric():
         self.ray_info = ray_info
     def flip_RXTX(self):
         ray_info = self.ray_info
-        ray_info[:, 3], ray_info[:, 4], ray_info[:, 5], ray_info[:, 6] = ray_info[:, 5], ray_info[:, 6], ray_info[:, 3], ray_info[:, 4]
-        self.ray_info = ray_info
+        self.ray_info[:, 3], self.ray_info[:, 4], self.ray_info[:, 5], self.ray_info[:, 6] = ray_info[:, 5], ray_info[:, 6], ray_info[:, 3], ray_info[:, 4]
     def __iter__(self):
         return iter(self.ray_info)
     def __str__(self):
