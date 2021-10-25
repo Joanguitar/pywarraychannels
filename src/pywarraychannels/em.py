@@ -62,7 +62,6 @@ class Geometric():
                 sind = np.sqrt(1-cosd**2)
                 sinad = cosa*sind + sina*cosd
                 Tau_est = Tau_0*(sina+sind)/sinad
-                print(np.abs(Tau_est-Tau)*c)
                 if np.abs(Tau_est-Tau)*c < epsilon:
                     if bool_LoS:
                         kind = "1order"
