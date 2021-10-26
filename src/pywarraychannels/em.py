@@ -29,11 +29,12 @@ class Geometric():
         if bool_flip_RXTX:
             self.flip_RXTX()
     def flip_RXTX(self):
-        ray_info = np.copy(self.ray_info)
-        self.ray_info[:, 3] = ray_info[:, 5]
-        self.ray_info[:, 4] = ray_info[:, 6]
-        self.ray_info[:, 5] = ray_info[:, 3]
-        self.ray_info[:, 6] = ray_info[:, 4]
+        if self.ray_info.size > 1:
+            ray_info = np.copy(self.ray_info)
+            self.ray_info[:, 3] = ray_info[:, 5]
+            self.ray_info[:, 4] = ray_info[:, 6]
+            self.ray_info[:, 5] = ray_info[:, 3]
+            self.ray_info[:, 6] = ray_info[:, 4]
     def classify_rays(self):
         epsilon = 1e-3
         c = 3e8
@@ -81,7 +82,10 @@ class Geometric():
                 classification.append(kind)
         return classification
     def __iter__(self):
-        return iter(self.ray_info)
+        if self.ray_info.size > 0:
+            return iter(self.ray_info)
+        else:
+            return iter([])
     def __str__(self):
         format_str = "{:>12s} {:>12s} {:>12s} {:>12s} {:>12s} {:>12s} {:>12s} {:>20s}\n"
         prntstr = "  "+format_str.format("Phase [deg]", "Time [s]", "Power [dBm]", "DoA_az [deg]", "DoA_el [deg]", "DoD_az [deg]", "DoD_el [deg]", "kind    ")

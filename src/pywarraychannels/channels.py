@@ -16,6 +16,12 @@ class Geometric():
         self.bool_sync = bool_sync
     def build(self, rays):
         channel = None
+        if len([ray for ray in rays]) == 0:
+            response_time = self.filter.response(len(self.f_k_rel), 0)
+            scalar_doa = self.antenna_RX.scalar_dir([0, 0, 0])
+            scalar_dod = self.antenna_TX.scalar_dir([0, 0, 0])
+            self.channel = np.zeros((len(scalar_doa), len(scalar_dod), len(response_time)))
+            return self.channel.copy()
         if self.bool_sync:
             tau_min = np.min([ray[1] for ray in rays])
         else:
