@@ -2,11 +2,11 @@ import pywarraychannels
 import numpy as np
 import matplotlib.pyplot as plt
 
-### Declare antennas
+# Declare antennas
 lin_antenna = pywarraychannels.antennas.LinearAntenna(8)
 rect_antenna = pywarraychannels.antennas.RectangularAntenna((8, 16))
 
-### Set reduced codebooks and plot them
+# Set reduced codebooks and plot them
 # Linear
 lin_antenna.set_reduced_codebook(4)
 theta = np.linspace(-np.pi, np.pi, 1024)

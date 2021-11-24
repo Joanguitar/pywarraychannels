@@ -5,12 +5,12 @@ import scipy.ndimage as sndimage
 
 ### Channel classes
 class Geometric():
-    def __init__(self, antenna_RX, antenna_TX, K = 128, f_c = 60e9, B = 1.760e9, filter = pywarraychannels.filters.RCFilter(), bool_sync = True):
+    def __init__(self, antenna_RX, antenna_TX, K=128, f_c=60e9, B=1.760e9, filter=pywarraychannels.filters.RCFilter(), bool_sync=True):
         self.antenna_RX = antenna_RX
         self.antenna_TX = antenna_TX
         self.f_c = f_c
         self.B = B
-        self.f_k = np.linspace(f_c-B/2, f_c+B/2, K, endpoint = False)+B/(2*K)
+        self.f_k = np.linspace(f_c-B/2, f_c+B/2, K, endpoint=False)+B/(2*K)
         self.f_k_rel = self.f_k/f_c
         self.filter = filter
         self.bool_sync = bool_sync
@@ -43,7 +43,7 @@ class Geometric():
                     {"cg": complex_gain, "pi": np.pi, "sdoa": scalar_doa[:, np.newaxis, np.newaxis], "sdod": scalar_dod[np.newaxis, :, np.newaxis], "tr": np.transpose(response_time, [1, 2, 0])}) # Equivalente optimized line
         self.channel = channel
         return channel
-    def measure(self, signal = None, mode = "Pairs"):
+    def measure(self, signal=None, mode="Pairs"):
         if signal is None:
             signal = [np.sqrt(len(self.f_k_rel))]
         if mode == "Pairs":
@@ -60,7 +60,7 @@ class Geometric():
         return "Geometric channel\nSize: "+"x".join([str(a) for a in np.shape(self.channel)])+"\nEntries: "+" ".join([str(a) for a in np.ndarray.flatten(self.channel)])
 
 class AWGN():
-    def __init__(self, channel_dependency, power = 1, noise = 1e-1):
+    def __init__(self, channel_dependency, power=1, noise=1e-1):
         self.channel_dependency = channel_dependency
         self.amp = np.sqrt(power)
         self.sigma = np.sqrt(noise/2)
@@ -70,5 +70,32 @@ class AWGN():
         meas = self.channel_dependency.measure(*args, **kwargs)
         noise = self.sigma*(np.random.randn(*meas.shape)+1j*np.random.randn(*meas.shape))
         return self.amp*meas + noise
+    def __str__(self):
+        return "AWGN + "+str(self.channel_dependency)
+
+class Rician():
+    def __init__(self, channel_dependency, k=1):
+        self.channel_dependency = channel_dependency
+        self.k = k
+    def build(self, *args, **kwargs):
+        main_channel =  self.channel_dependency.build(*args, **kwargs)
+        rician_component = np.random.randn(*main_channel.shape)
+        rician_component *= np.linalg.norm(main_channel)*np.sqrt(self.k)/np.linalg.norm(rician_component)
+        self.rician_component = rician_component
+        return main_channel + rician_component
+    def measure(self, signal=None, mode="Pairs", *args, **kwargs):
+        meas = self.channel_dependency.measure(signal=signal, mode=mode, *args, **kwargs)
+        if signal is None:
+            signal = [np.sqrt(len(self.channel_dependency.f_k_rel))]
+        if mode == "Pairs":
+            c_tx = np.tensordot(self.channel_dependency.antenna_TX.codebook, self.rician_component, axes = (0, 1))
+            rx_c_tx = np.tensordot(np.conj(self.channel_dependency.antenna_RX.codebook), c_tx, axes = (0, 1))
+            return meas + sndimage.convolve1d(np.pad(rx_c_tx, ((0, 0), (0, 0), (len(signal)-1, 0))), signal, axis = 2)
+        elif mode == "Sequential":
+            rxtx_c = np.tensordot(self.channel_dependency.antenna_TX.codebook[np.newaxis, :, :]*np.conj(self.channel_dependency.antenna_RX.codebook)[:, np.newaxis, :], self.rician_component, axes = ([0, 1], [0, 1]))
+            return meas + sndimage.convolve1d(np.pad(rxtx_c, ((0, 0), (len(signal)-1, 0))), signal, axis = 1)
+        else:
+            print("Measure mode {} not recognized".format(mode))
+            raise
     def __str__(self):
         return "AWGN + "+str(self.channel_dependency)
