@@ -15,7 +15,7 @@ class Antenna():
         if len(dir.shape) == 1:
             dir = dir/np.linalg.norm(dir)
         else:
-            dir = dir/np.linalg.norm(dir, axis = -1)[:, np.newaxis]
+            dir = dir/np.linalg.norm(dir, axis = -1)[..., np.newaxis]
         dir = self.uncertainty.apply_inverse(dir)
         return np.dot(dir, self.antenna_elements.T)
     def steering_vector(self, dir):
