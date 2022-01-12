@@ -24,7 +24,7 @@ class Geometric():
             if len(ray_info.shape) == 1:
                 ray_info = ray_info[np.newaxis, :]
             else:
-                ray_info = ray_info[np.newaxis, :].T
+                ray_info = ray_info.T
         self.ray_info = ray_info
         if bool_flip_RXTX:
             self.flip_RXTX()
