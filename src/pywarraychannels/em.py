@@ -5,7 +5,7 @@ def polar2cartesian(az, el):
     return [np.cos(az)*np.cos(el), np.sin(az)*np.cos(el), np.sin(el)]
 
 def cartesian2polar(v):
-    return np.asin(v[2]), np.angle(v[0]+v[1]*1j)
+    return np.arcsin(v[2]), np.angle(v[0]+v[1]*1j)
 
 def wrapangle(a):
     return np.mod(a+np.pi, 2*np.pi)-np.pi
@@ -81,6 +81,8 @@ class Geometric():
                         kind += " (Ceiling)"
                 classification.append(kind)
         return classification
+    def first(self, n):
+        return Geometric(self.ray_info[:n])
     def __iter__(self):
         if self.ray_info.size > 0:
             return iter(self.ray_info)
