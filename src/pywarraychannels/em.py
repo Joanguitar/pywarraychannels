@@ -5,7 +5,7 @@ def polar2cartesian(az, el):
     return [np.cos(az)*np.cos(el), np.sin(az)*np.cos(el), np.sin(el)]
 
 def cartesian2polar(v):
-    return np.arcsin(v[2]), np.angle(v[0]+v[1]*1j)
+    return np.angle(v[0]+v[1]*1j), np.arcsin(v[2])
 
 def wrapangle(a):
     return np.mod(a+np.pi, 2*np.pi)-np.pi
