@@ -28,6 +28,8 @@ class Antenna():
     def set_codebook(self, codebook):
         codebook = codebook/np.linalg.norm(codebook, ord = 2, axis = 0)[np.newaxis, ...]
         self.codebook = codebook
+    def codebook_corr(self):
+        return np.dot(np.conj(self.codebook.T), self.codebook)
 
 ### Basic antenna classes
 class LinearAntenna(Antenna):

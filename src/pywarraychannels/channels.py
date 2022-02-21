@@ -59,8 +59,30 @@ class Geometric():
     def __str__(self):
         return "Geometric channel\nSize: "+"x".join([str(a) for a in np.shape(self.channel)])+"\nEntries: "+" ".join([str(a) for a in np.ndarray.flatten(self.channel)])
 
+class MIMO():
+    def __init__(self, channel_dependency, pilot=None):
+        self.channel_dependency = channel_dependency
+        self.pilot = pilot
+    def build(self, *args, **kwargs):
+        return self.channel_dependency.build(*args, **kwargs)
+    def measure(self, *args, **kwargs):
+        meas_tap = self.channel_dependency.measure(*args, **kwargs)
+        M_RX, M_TX, D = meas_tap.shape
+        pilot = self.pilot or np.concatenate(
+            [
+                np.zeros((M_TX, D)),
+                np.fft.fft(np.eye(M_TX)),
+                np.zeros((M_TX, D-M_TX))
+            ], axis=1)
+        meas = np.zeros((M_RX, pilot.shape[1]-D), dtype="complex")
+        for d in range(D):
+            meas += np.dot(meas_tap[:, :, d], pilot[:, D-d-1:-d-1])
+        return meas
+    def __str__(self):
+        return "MIMO + "+str(self.channel_dependency)
+
 class AWGN():
-    def __init__(self, channel_dependency, power=1, noise=1e-1):
+    def __init__(self, channel_dependency, power=1, noise=1e-1, corr=None):
         self.channel_dependency = channel_dependency
         self.amp = np.sqrt(power)
         self.sigma = np.sqrt(noise/2)
@@ -69,7 +91,15 @@ class AWGN():
     def measure(self, *args, **kwargs):
         meas = self.channel_dependency.measure(*args, **kwargs)
         noise = self.sigma*(np.random.randn(*meas.shape)+1j*np.random.randn(*meas.shape))
-        return self.amp*meas + noise
+        if self.L is None:
+            return self.amp*meas + noise
+        else:
+            return self.amp*meas + np.dot(self.L, noise)
+    def set_corr(self, corr=None):
+        if corr is None:
+            self.L = None
+        else:
+            self.L = np.linalg.cholesky(corr)
     def __str__(self):
         return "AWGN + "+str(self.channel_dependency)
 
@@ -98,4 +128,4 @@ class Rician():
             print("Measure mode {} not recognized".format(mode))
             raise
     def __str__(self):
-        return "AWGN + "+str(self.channel_dependency)
+        return "Rician + "+str(self.channel_dependency)
