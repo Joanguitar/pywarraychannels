@@ -68,12 +68,15 @@ class MIMO():
     def measure(self, *args, **kwargs):
         meas_tap = self.channel_dependency.measure(*args, **kwargs)
         M_RX, M_TX, D = meas_tap.shape
-        pilot = self.pilot or np.concatenate(
-            [
-                np.zeros((M_TX, D)),
-                np.fft.fft(np.eye(M_TX)),
-                np.zeros((M_TX, D-M_TX))
-            ], axis=1)
+        if self.pilot is None:
+            pilot = np.concatenate(
+                [
+                    np.zeros((M_TX, D)),
+                    np.fft.fft(np.eye(M_TX)),
+                    np.zeros((M_TX, D-M_TX))
+                ], axis=1)
+        else:
+            pilot = self.pilot
         meas = np.zeros((M_RX, pilot.shape[1]-D), dtype="complex")
         for d in range(D):
             meas += np.dot(meas_tap[:, :, d], pilot[:, D-d-1:-d-1])
