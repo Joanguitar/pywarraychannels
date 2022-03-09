@@ -2,16 +2,16 @@ import numpy as np
 
 
 class Static():
-    def __init__(self, tilt=0, pan=0, roll=0):
-        self.state = [tilt, pan, roll]
-        tilt_cos = np.cos(tilt)
-        tilt_sin = np.sin(tilt)
-        self.transform = np.array(
-            [[tilt_cos, -tilt_sin, 0], [tilt_sin, tilt_cos, 0], [0, 0, 1]])
+    def __init__(self, pan=0, tilt=0, roll=0):
+        self.state = [pan, tilt, roll]
         pan_cos = np.cos(pan)
         pan_sin = np.sin(pan)
+        self.transform = np.array(
+            [[pan_cos, -pan_sin, 0], [pan_sin, pan_cos, 0], [0, 0, 1]])
+        tilt_cos = np.cos(tilt)
+        tilt_sin = np.sin(tilt)
         self.transform = np.dot(self.transform, np.array(
-            [[pan_cos, 0, -pan_sin], [0, 1, 0], [pan_sin, 0, pan_cos]]))
+            [[tilt_cos, 0, -tilt_sin], [0, 1, 0], [tilt_sin, 0, tilt_cos]]))
         roll_cos = np.cos(roll)
         roll_sin = np.sin(roll)
         self.transform = np.dot(self.transform, np.array(
