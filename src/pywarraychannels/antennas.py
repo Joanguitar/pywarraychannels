@@ -25,9 +25,9 @@ class Antenna():
             dir = np.array(dir)
             dir = self.uncertainty.apply_inverse(dir)
             if len(dir.shape) == 1:
-                return ne.evaluate("cos(sdir)+1j*sin(sdir)")*(dir[2] > 0)
+                return ne.evaluate("cos(sdir)+1j*sin(sdir)")*(dir[2] >= 0)
             else:
-                return ne.evaluate("cos(sdir)+1j*sin(sdir)")*(dir[..., 2] > 0)[..., np.newaxis]
+                return ne.evaluate("cos(sdir)+1j*sin(sdir)")*(dir[..., 2] >= 0)[..., np.newaxis]
         else:
             return ne.evaluate("cos(sdir)+1j*sin(sdir)")
     def array_factor(self, dir):
