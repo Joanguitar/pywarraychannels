@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 # Declare antennas
 lin_antenna = pywarraychannels.antennas.LinearAntenna(8)
-rect_antenna = pywarraychannels.antennas.RectangularAntenna((8, 16))
+rect_antenna = pywarraychannels.antennas.RectangularAntenna((8, 16), z_positive=True)
 
 # Set reduced codebooks and plot them
 # Linear

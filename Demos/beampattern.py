@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 # Declare antennas
 lin_antenna = pywarraychannels.antennas.LinearAntenna(8)
-rect_antenna = pywarraychannels.antennas.RectangularAntenna((8, 16))
+rect_antenna = pywarraychannels.antennas.RectangularAntenna((8, 16), z_positive=True)
 
 # Direction the beam-pattern is pointing to
 dir = np.asarray([0, 0, 1])
@@ -17,7 +17,7 @@ theta = np.linspace(-np.pi, np.pi, 1024)
 # Linear
 steering_vector = lin_antenna.steering_vector(dir)
 lin_antenna.set_codebook(steering_vector)
-AR = lin_antenna.array_factor([[np.cos(th), np.sin(th), 0] for th in theta])
+AR = lin_antenna.array_factor([[np.cos(th), 0, np.sin(th)] for th in theta])
 plt.figure(0)
 plt.plot(np.cos(theta)*np.power(np.abs(AR), 2), np.sin(theta)*np.power(np.abs(AR), 2))
 plt.xlim([-8, 8])

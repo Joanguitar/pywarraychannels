@@ -7,7 +7,7 @@ uncertainty_RX = pywarraychannels.uncertainties.UniformTiltPanRoll(u_pan = False
 
 # Define antennas
 antenna_RX = pywarraychannels.antennas.LinearAntenna(32, uncertainty = uncertainty_RX)
-antenna_TX = pywarraychannels.antennas.RectangularAntenna((8, 16))
+antenna_TX = pywarraychannels.antennas.RectangularAntenna((8, 16), z_positive=True)
 
 # Define the channel class
 channel = pywarraychannels.channels.AWGN(

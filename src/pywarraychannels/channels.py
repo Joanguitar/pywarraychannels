@@ -89,6 +89,10 @@ class AWGN():
         self.channel_dependency = channel_dependency
         self.amp = np.sqrt(power)
         self.sigma = np.sqrt(noise/2)
+        if corr is None:
+            self.L = None
+        else:
+            self.L = np.linalg.cholesky(corr)
     def build(self, *args, **kwargs):
         return self.channel_dependency.build(*args, **kwargs)
     def measure(self, *args, **kwargs):

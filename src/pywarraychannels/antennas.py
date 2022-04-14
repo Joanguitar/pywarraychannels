@@ -5,11 +5,12 @@ import pywarraychannels.uncertainties
 
 ### Basic antenna class
 class Antenna():
-    def __init__(self, antenna_elements, uncertainty = pywarraychannels.uncertainties.Static()):
+    def __init__(self, antenna_elements, uncertainty=pywarraychannels.uncertainties.Static(), z_positive=False):
         """Example: Antenna([[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0]])"""
         self.antenna_elements = np.array(antenna_elements)
         self.uncertainty = uncertainty
         self.set_codebook(sfft.fft(np.eye(len(antenna_elements)))/np.sqrt(len(antenna_elements)))
+        self.z_positive = z_positive
     def scalar_dir(self, dir):
         dir = np.array(dir)
         if len(dir.shape) == 1:
@@ -20,7 +21,15 @@ class Antenna():
         return np.dot(dir, self.antenna_elements.T)
     def steering_vector(self, dir):
         sdir = self.scalar_dir(dir) * np.pi
-        return ne.evaluate("cos(sdir)+1j*sin(sdir)")
+        if self.z_positive:
+            dir = np.array(dir)
+            dir = self.uncertainty.apply_inverse(dir)
+            if len(dir.shape) == 1:
+                return ne.evaluate("cos(sdir)+1j*sin(sdir)")*(dir[2] > 0)
+            else:
+                return ne.evaluate("cos(sdir)+1j*sin(sdir)")*(dir[..., 2] > 0)[..., np.newaxis]
+        else:
+            return ne.evaluate("cos(sdir)+1j*sin(sdir)")
     def array_factor(self, dir):
         return np.dot(np.conj(self.steering_vector(dir)), self.codebook)
     def update_uncertainty(self):
@@ -33,7 +42,7 @@ class Antenna():
 
 ### Basic antenna classes
 class LinearAntenna(Antenna):
-    def __init__(self, N_antennas, dir = [1, 0, 0], *args, **kwargs):
+    def __init__(self, N_antennas, dir=[1, 0, 0], *args, **kwargs):
         """Example: LinearAntenna(8)"""
         dir = np.array(dir)
         super(LinearAntenna, self, *args).__init__(np.arange(N_antennas)[:, np.newaxis]*dir[np.newaxis, :], *args, **kwargs)
@@ -50,7 +59,7 @@ class LinearAntenna(Antenna):
         self.set_codebook(bp[:, np.newaxis]*np.exp(1j*np.arange(self.N_antennas)[:, np.newaxis]*angles[np.newaxis, :]))
 
 class RectangularAntenna(Antenna):
-    def __init__(self, N_antennas, dir = ([1, 0, 0], [0, 1, 0]), *args, **kwargs):
+    def __init__(self, N_antennas, dir=([1, 0, 0], [0, 1, 0]), *args, **kwargs):
         """Example: RectangularAntenna((8, 8))"""
         dir = np.array(dir)
         grid_y, grid_x = np.meshgrid(np.arange(N_antennas[1]), np.arange(N_antennas[0]))
@@ -69,7 +78,7 @@ class RectangularAntenna(Antenna):
         self.cdb1 = None
         self.cdb2 = None
         super(RectangularAntenna, self).set_codebook(codebook)
-    def set_reduced_codebook(self, n, overlap = True):
+    def set_reduced_codebook(self, n, overlap=True):
         if overlap:
             width1, width2 = 2*np.pi/n[0]+np.pi/self.N_antennas[0], 2*np.pi/n[1]+np.pi/self.N_antennas[1]
         else:
