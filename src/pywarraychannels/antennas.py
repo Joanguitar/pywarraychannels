@@ -35,7 +35,7 @@ class Antenna():
     def update_uncertainty(self):
         self.uncertainty.update()
     def set_codebook(self, codebook):
-        codebook = codebook/np.linalg.norm(codebook, ord = 2, axis = 0)[np.newaxis, ...]
+        codebook = codebook/np.maximum(np.linalg.norm(codebook, ord = 2, axis = 0)[np.newaxis, ...], 1e-8)
         self.codebook = codebook
     def codebook_corr(self):
         return np.dot(np.conj(self.codebook.T), self.codebook)
@@ -45,7 +45,7 @@ class LinearAntenna(Antenna):
     def __init__(self, N_antennas, dir=[1, 0, 0], *args, **kwargs):
         """Example: LinearAntenna(8)"""
         dir = np.array(dir)
-        super(LinearAntenna, self, *args).__init__(np.arange(N_antennas)[:, np.newaxis]*dir[np.newaxis, :], *args, **kwargs)
+        super(LinearAntenna, self).__init__(np.arange(N_antennas)[:, np.newaxis]*dir[np.newaxis, :], *args, **kwargs)
         self.N_antennas = N_antennas
         self.codebook = sfft.fft(np.eye(N_antennas))/np.sqrt(N_antennas)
     def set_reduced_codebook(self, n, overlap = True):
@@ -65,7 +65,7 @@ class RectangularAntenna(Antenna):
         grid_y, grid_x = np.meshgrid(np.arange(N_antennas[1]), np.arange(N_antennas[0]))
         grid_x, grid_y = np.ndarray.flatten(grid_x), np.ndarray.flatten(grid_y)
         grid = np.array([grid_x, grid_y]).T
-        super(RectangularAntenna, self, *args).__init__(np.dot(grid, dir), *args, **kwargs)
+        super(RectangularAntenna, self).__init__(np.dot(grid, dir), *args, **kwargs)
         self.N_antennas = N_antennas
         self.set_pair_codebook(sfft.fft(np.eye(N_antennas[0])), sfft.fft(np.eye(N_antennas[1])))
     def set_pair_codebook(self, cdb1, cdb2):

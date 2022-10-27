@@ -1,13 +1,14 @@
 import numpy as np
 
 def __RCF__(rolloff_rc, t, M_rc):
-    denominator = 1 - np.power((2 * rolloff_rc * t / M_rc), 2)
+    t_scaled = (rolloff_rc / M_rc) * t
+    denominator = 1 - 4 * t_scaled**2
     if rolloff_rc == 0:
         inder_val = 0
     else:
         inder_val = np.sinc(1/(2*rolloff_rc))*(np.pi/4)
     sinc_val = np.sinc(t / M_rc)
-    cos_val =np.cos(np.pi * rolloff_rc * t / M_rc)
+    cos_val = np.cos(np.pi * t_scaled)
     denominator_no0 = denominator
     denominator_no0[np.abs(denominator) < 1e-6] = 1
     return np.where(np.abs(denominator) < 1e-6, inder_val, sinc_val * cos_val / denominator_no0)
