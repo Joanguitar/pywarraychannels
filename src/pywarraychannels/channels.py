@@ -47,7 +47,7 @@ class Geometric():
         return channel
     def measure(self, signal=None, mode="Pairs"):
         if signal is None:
-            signal = [np.sqrt(len(self.f_k_rel))]
+            signal = [1]
         if mode == "Pairs":
             #c_tx = np.tensordot(self.antenna_TX.codebook, self.channel, axes = (0, 1))
             #rx_c_tx = np.tensordot(np.conj(self.antenna_RX.codebook), c_tx, axes = (0, 1))

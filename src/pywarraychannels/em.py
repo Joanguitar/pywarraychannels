@@ -2,10 +2,10 @@ import numpy as np
 
 # Auxiliar
 def polar2cartesian(az, el):
-    return [np.cos(az)*np.cos(el), np.sin(az)*np.cos(el), np.sin(el)]
+    return np.stack([np.cos(az)*np.cos(el), np.sin(az)*np.cos(el), np.sin(el)], axis=-1)
 
 def cartesian2polar(v):
-    return np.angle(v[0]+v[1]*1j), np.arcsin(v[2])
+    return np.angle(v[..., 0]+v[..., 1]*1j), np.arcsin(v[..., 2])
 
 def wrapangle(a):
     return np.mod(a+np.pi, 2*np.pi)-np.pi
@@ -25,6 +25,7 @@ class Geometric():
                 ray_info = ray_info[np.newaxis, :]
             else:
                 ray_info = ray_info.T
+        ray_info[..., 3:7] = np.mod(ray_info[..., 3:7]+180, 360)-180
         self.ray_info = ray_info
         if bool_flip_RXTX:
             self.flip_RXTX()
